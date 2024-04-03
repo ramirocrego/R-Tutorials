@@ -654,8 +654,8 @@ new.car<- mtcars[4,]
 new.car$cyl<- 8
 new.car
 ```
-```{r}
-#predict(rf.model, newdata = new.car)
+```{r, eval= F}
+predict(rf.model, newdata = new.car, type = "response")
 ```
 
 > QUESTIONS: 
@@ -712,7 +712,7 @@ The data set consists of rodent presence/absence and three predictor variables:
 2. DISTX = the distance to the nearest large (>100 ha) "source canyon."
 3. AGE = time elapsed since the fragment was isolated by development
 
-![](BolderStudyArea.jpg)
+![From Bolger et al. 1997](FIGURES/BolderStudyArea.jpg)
 
 ***
 

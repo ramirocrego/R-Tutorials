@@ -1,0 +1,10 @@
+# QGIS Generated Color Map Export File
+INTERPOLATION:DISCRETE
+11,0,255,0,255,Deciduous
+12,0,128,0,255,Coniferous
+13,0,255,255,255,Shrub
+20,255,128,0,255,Agruculture
+30,255,255,0,255,Pasture
+40,0,0,255,255,Water
+50,255,0,0,255,Urban
+255,0,0,0,255,No Data

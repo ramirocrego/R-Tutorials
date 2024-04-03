@@ -49,9 +49,17 @@ During the course, students will use R and R-Studio. R is a programming language
 
 -RStudio Desktop: https://rstudio.com/products/rstudio/
 
+## Data access
+
+All the data used in the tutorials are available in this [link](https://github.com/ramirocrego/R-Tutorials/tree/main/data)
+
+
 ```{r child = '01-IntroductionToR.Rmd'}
 ```
 
 ```{r child = '02-IntroDataAnalysis.Rmd'}
+```
+
+```{r child = '03-IntroductionToGIS.Rmd'}
 ```
 

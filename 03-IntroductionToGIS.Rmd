@@ -42,6 +42,16 @@ plot(st_linestring(matrix(runif(6), ncol=2)) )
 plot(st_polygon(list(rbind(c(0,0), c(1,0), c(1,1), c(0,1), c(0,0)))))
 ```
 
+### A short, but important word about coordinates and projections
+
+Any spatial data collected using GPS devices or downloaded online must have a projection system that links the coordinates to specific locations on the earth's surface. Wiithout a coordinate reference system, we cannot locate places on Earth. 
+
+Any given geospatial data (e.g. a set of points) with an incorrect projection or with unknown projection system can be visualized on its own. However, you will not be able to plot that spatial data with other spatial data, as the coordinate reference system is missing. Importantly, you will not be able to conduct any spatial analysis (e.g., calculate the distance of a given point to a road, or extract value of the underlining raster value at the point locations), since the incorrectly projected (or unprojected) spatial data is pointing to a completely different location on earth than intended. 
+
+Spatial data without the correct projection system is basically useless. When you acquire or download a geospatial data, make sure you know what projection the data were originally made (this information is usually found in the metadata of a given dataset).
+
+There are EPSG Codes that can be used to avoid manually setting all the parameters needed in a projection. For instance, the code EPSG:32637 codes for the UTM37N projection with WGS84 datum and ellipsoid. You can find the EPSG reference list in the following link: http://spatialreference.org/ref/epsg/
+
 ### R packages for Vector Data
 
 There were two main packages in R to handle geospatial vector data: the **sp** package and the **sf** package.
@@ -58,11 +68,11 @@ It was first released on CRAN in late October 2016. It implements a formal stand
 
 ### The `sf` Package
 
-The sf class is an extension of data frames. Essentially, sf objects can be treated as data frames that also contain spatial data, as opposed to spatial data that may or may not also contain data frames. This enables sf objects to fit within the `tidyverse` workflow, making it possible to manipulate them with `dplyr` commands.
+The sf class is an extension of data frames. Essentially, sf objects can be treated as data frames that also contain spatial data, as opposed to spatial data that may or may not also contain data frames. This enables sf objects to fit within the `tidyverse` workflow, making it possible to manipulate them with the `dplyr` commands we saw before.
 
 sf objects consist of rows of features, hence the name "simple features (sf)", which have both non-spatial and spatial data formats. 
 
-The spatial data of an sf object is contained in a special geometry column that is of class 'sfc'. The geometry column contains the same basic types of spatial data as the slots in Spatial objects: the CRS, coordinates, and type of geometric object. 
+The spatial data of an sf object is contained in a special geometry column that is of class 'sfc'. The geometry column contains the basic types of spatial data: the Coordinate Reference System (CRS), coordinates, and type of geometric object. 
 
 The 'sfc' class has seven subclasses to denote the types of geometric objects within the geometry column, which are derived from the simple features standard. The possible geometric objects are point, linestring, polygon, multipoint, multilinestring, multipolygon, and geometrycollection, which is used for any combination of the other types.
 
@@ -70,7 +80,11 @@ Now lets do some operations using sf.
 
 ### Convert a data frame to a sf object
 
-The `st_as_sf()` function uses a vector of the coordinate columns for the 'coords' argument, and take either an EPSG code or a PROJ definition for the crs.
+In your research you may create spreadsheets that contain data associated with spatial coordinates. You already know how to read the spreadsheet into a data frame with `read.table` or `read.csv`. We can then very easily convert the table into a spatial object in R.
+
+Lets start converting a data frame into a sf object. For this, our data frame needs to have at least two columns indicating the coordinates of points. This could be the location of animal observations recorded on the field, for instance.
+
+We will use the `st_as_sf()` function that uses a vector of the coordinate columns for the 'coords' argument, and take either an EPSG code or a PROJ definition for the crs.
 
 ```{r}
 mt_df <- read.csv("data/ke_major-towns.csv", header = TRUE)
@@ -80,11 +94,15 @@ points_sf <- st_as_sf(mt_df, coords = c("lon", "lat"), crs = 4326)
 print(points_sf)
 ```
 
+We now have a sf object containing the location of major towns in Kenya.
+
 ### Projections and reporjections 
 
-If you need to asign a CRS to an `sf` object, you can use the function `st_set_crs()`.
+If you need to asign a CRS to an `sf` object, you can use the function `st_set_crs()`. 
 
 To reproject an `sf` object, you can use the function `st_transform()`. You need to provide the object and the new CRS.
+
+Here, we are going to project the spatial object from WGS84 to UTM37N.
 
 ```{r}
 points_sf_UTM <- st_transform(points_sf, crs="+proj=utm +zone=37 +north +ellps=WGS84 +datum=WGS84 +units=m")
@@ -93,37 +111,51 @@ points_sf_UTM
 
 We can see that the projection is now UTM 37N.
 
-### A brief, but important word about projection.
+### Reading Shapefiles into R
 
-Any spatial data collected using GPS devices or downloaded online must have a projection system that links the coordinates to specific locations on the earth's surface. A given geospatial data (e.g. a set of points) with an incorrect projection or with unknown projection system might be OK for visualizing that specific dataset alone. However, it will not work if you wish to: overlay the data with other geospatial data (e.g. overlay the points with boundary lines or environmental raster), even for visualization purposes; or conduct any spatial analysis (calculate the distance of a given point to a road, or extract value of the underlining raster value at the point locations), since the incorrectly projected (or unprojected) spatial data is pointing to a completely different location on earth than intended. Spatial data without the correct projection is basically useless. When you acquire or download a geospatial data, make sure you know what projection the data were originally made (this information is usually found in the metadata of a given dataset).
-
-There are EPSG Codes that can be used to avoid manually setting all the parameters needed in a projection. For instance, the code EPSG:32637 codes for the UTM37N projection with WGS84 datum and ellipsoid. You can find the EPSG reference list in the following link: http://spatialreference.org/ref/epsg/
-
-
-### sf object manipulation
-
-Unlike Spatial objects that use slots to distinguish the classes, all sf objects can generally be treated as data frames when wrangling the data. This makes it possible to use workflows from the tidyverse package.
-
-For instance, returning the subset of mammals as we did before, can be done with dplyr’s `filter()` function.
-
-First, lets load the shapefile using sf function `st_read`. Much simpler!
+Reading shapefiles into R using the `sf` package is quite simple. We can use the function `st_read()`
 
 ```{r}
 mammals <- st_read("data/ke_mammals_WGS84.shp")
 mammals
 ```
 
-Now we can filter the sf object:
+> What kind of vector data is this?
+
+### sf object manipulation
+
+All sf objects can generally be treated as data frames when wrangling the data. This makes it possible to use workflows from the tidyverse package.
+
+For instance, returning the subset of mammals as we did before, can be done with dplyr’s `filter()` function.
+
+Working with the `mammals` sf object, lets filter polygons that contain more than 60 species of mammals
 
 ```{r}
 mammals_60 <- mammals %>% filter(MAMMALS > 60)
 mammals_60
 ```
 
+We now have a new object with only polygons containing more than 60 species of mammals.
+
+You can save this new object as a shapefile using the `st_write()` function. You need to provide the sf object and the path and name where you want to save the shapefile. By default, this function checks if the file already exists, and if so it will not overwrite it. You can change the parameter delete_layer = TRUE to overwrite a shapefile with the same name.
+
+```{r, eval = F}
+st_write(mammals_60, "data/mammals_60", driver = "ESRI Shapefile", delete_layer = TRUE)
+```
+
+This is a very basic introduction to vector data. In future workflows, we will learn to use more spatial tools to manipulate vector data.
+
+Note that we have not plot any vector data yet. You can use the function `plot()` to plot sf, but the plots are not great. We will learn to use another package for making maps later.
 
 ## Working with Raster Data in R
 
 Raster processing is an important aspect of building spatial datasets for further analysis. Doing so within [R](https://cran.r-project.org/) can greatly help streamline workflows, allowing for all analyses to be completed in a single program. Here, we will walk through a series of steps to provide the basic skills necessary for image analysis.
+
+A raster image is composed by pixels or cells. Each raster contains a CRS, the coordinates of its origin, dimensions, and an array of cell values. 
+
+The package `rater` was the main package to work with raster data in R. In 2020, the package `terra` was released, and thanks to its greater functionality and efficiency, has now replaced the `raster` package.
+
+***
 
 For this exercise we will use a Landsat 8 image. Before we start processing the image it is good to remember the different bands of Landsat 8:
 
@@ -143,29 +175,24 @@ Band 11 | TIRS 2	11.50 - 12.51	| 100 meter resolution, Improved thermal mapping 
 BQA			|                       | Landsat Collection 1 QA Bitmask 
 
 
-***
+### Loading rasters
 
-There are three types of image classes:
+We use the function `rast()` to read a raster. In this case we are reading the Landsat8 image.
+```{r}
+Image <- rast("./data/Landsat8.tif") 
+Image
+```
 
-1) RasterLayer: single band image
-2) RasterBrick: must be formed from a single multi-layer file
-3) RasterStack: a collection (list) of raster layer objects
+> Questions:
+> What is the spatial resolution of this image?
+> What is the CRS?
+> How many bands are there?
 
-### Loading Images as a RasterLayer, RasterBrick, and RasterStack
+If you only want to read the 11 bands, you can use the argument lyrs
 
-View the results of the three different types of rasters
-```{r Image}
-# Raster Layer
-ImageB4 <- raster("./data_IntroToGIS/Landsat8.tif",band=4) #loads only band 4 (red)
-plot(ImageB4)
-# Raster Brick
-ImageBrick <- brick("./data_IntroToGIS/Landsat8.tif") #no band was specified, so all bands are loaded
-ImageBrick
-plot(ImageBrick)
-# Raster Stack
-ImageStack <- stack("./data_IntroToGIS/Landsat8.tif", bands=1:5) #bands=1:5 --> loads only bands 1 to 5
-ImageStack
-plot(ImageStack)
+```{r}
+Image2 <- rast("./data/Landsat8.tif", lyrs = c(1:11)) 
+Image2
 ```
 
 ### Querying the Image to Obtain Basic Image Information
@@ -173,34 +200,29 @@ plot(ImageStack)
 Similar to a data.frame, raster objects store all the relevant information to do data manipulation and/or visualization.
 
 ```{r ImageInfo, warning=FALSE}
-print(ImageStack) # Alternatively, you could just type: ImageStack
+print(Image) # Alternatively, you could just type: ImageStack
 # Raster Class
-class(ImageStack)
-# Raster Structure.  Print if you want to see the results.
-#str(ImageStack)
+class(Image)
 # Names of the raster layers
-names(ImageStack)
+names(Image)
 # Summary statistics (min, max, quartiles)
-summary(ImageStack)
-# Number of bands
-nlayers(ImageStack)
-# Raster extent
-extent(ImageStack)
+summary(Image)
+# Spatial extent
+ext(Image)
 ```
-
 ### Projections in rasters
 
-To set a crs to a raster you only need to do the following:
-
-```{r, eval=F}
-crs(yourraster) <- "+proj=longlat +ellps=WGS84 +datum=WGS84" #Or another crs 
-```
-
-To reproject a raster, you need to use the `projectRaster()` function from the `raster` package. Note that as the pixel position will slightly shift, you need to provide an argument for the methods to recalculate the new pixel values. In general, you use 'bilinear' for continuous data and 'rgb' for classes.
+You can check the projection of your raster using `crs`
 
 ```{r}
-ImageB4latlong <- projectRaster(ImageB4, crs= "+proj=longlat +ellps=WGS84 +datum=WGS84", method = 'bilinear')
-ImageB4latlong
+crs(Image, proj = TRUE)
+```
+
+To reproject a raster, you need to use the function `project()`. Note that as the pixel position will slightly shift, you need to provide an argument for the methods to recalculate the new pixel values. In general, you use 'bilinear' for continuous data and 'rgb' for classes.
+
+```{r}
+Imagelatlong <- project(Image, "+init=epsg:4326", method = 'bilinear')
+crs(Imagelatlong, proj = TRUE)
 ```
 
 ### Image Plotting
@@ -209,23 +231,19 @@ Raster images can be plotted using a number of commands. Try a few commands to s
 
 ```{r PlotImage}
 # A plot of the image with lots of options
-plot(ImageBrick,4)
-# Also try spplot:
-#spplot(ImageBrick,4)
-# Plot a 3-band RGB image
-plotRGB(ImageBrick, r=4, g=3, b=2, stretch = "lin", axes=TRUE, xlab="Easting", ylab="Northing", main="Landsat 8, Bands 4,3,2 (RGB) - True Color Composite")
-# Plot a 3-band RGB image in false color composite
-plotRGB(ImageBrick, r=5, g=4, b=3, stretch = "lin", axes=TRUE, xlab="Easting", ylab="Northing", main="Landsat 8, Bands 5,4,3 (RGB) - False Color Composite")
+plot(Image,4)
 
-# Query values in an image: click() [use after plot()]
-#click(ImageBrick, n=3)  #n=5 for five clicks
-# The 'rasterVis' package has more advanced plotting methods for Raster objects
+# Plot a 3-band RGB image
+plotRGB(Image, r=4, g=3, b=2, stretch = "lin", axes=TRUE, xlab="Easting", ylab="Northing", main="Landsat 8, Bands 4,3,2 (RGB) - True Color Composite")
+
+# Plot a 3-band RGB image in false color composite
+plotRGB(Image, r=5, g=4, b=3, stretch = "lin", axes=TRUE, xlab="Easting", ylab="Northing", main="Landsat 8, Bands 5,4,3 (RGB) - False Color Composite")
 ```
 
 
-### Image Math using Standard Operations and Functions 
+### Raster calculations
 
-The real strength of the raster package is the ability to perform complex mathematical operations.
+The real strength of the terra package is the ability to perform complex mathematical operations.
 
 **NDVI**
 
@@ -238,8 +256,8 @@ where red and NIR stand for the spectral reflectance measurements acquired in th
 
 ```{r ImageMath}
 # Using standard math operators, rename the red band (band 3) and the near-infrared band (band 4) in the image.
-redBand <- ImageBrick$B4
-nirBand <- ImageBrick$B5
+redBand <- Image$B4
+nirBand <- Image$B5
 
 # Create NDVI
 ndvi <- (nirBand-redBand)/(nirBand+redBand)
@@ -250,44 +268,34 @@ hist(ndvi)
 
 ### Pixel Extraction
 
-One of the most important items in raster processing is the development of samples of spatial datasets for further analysis. Here we describe an example on how to extract a sample of values throughout the image, using two different methods: 
-
-* Randomly sampling locations
-* Regular sampling locations
-
-Use `help(sampleRandom)` or `help(sampleRegular)` to find out additional information.
+One of the most important items in raster processing is the development of samples of spatial datasets for further analysis. 
+We will see how to extract pixel values from the NDVI raster. For this example, we will create random points using the `st_sample()` function withing the bounding box of the NDVI raster.
 
 ```{r PixelExtraction}
 # Select random samples (pixels) from a raster
-ranSamps <- sampleRandom(ndvi, size=10)
+ranSamps <- st_sample(st_bbox(ndvi), size=10, type = "random")
+ranSamps <- st_as_sf(ranSamps) #Convert to simple feature collection
 ranSamps
 
-# What if I want to see the points?
-# See help(sampleRandom)
-ranSamps2 <- sampleRandom(ndvi, size=10, sp=TRUE)
+# Plot ndvi and the random points
 plot(ndvi)
-plot(ranSamps2, add=TRUE, cex=1, pch=2)
-
-# Select random samples (pixels) from a raster in a systematic way 
-sysSamps <- sampleRegular(ndvi, size=10)
-sysSamps
-
-# Select random samples (pixels) from a raster using stratification (predefined pixel values): 
-#sampleStratified() [we can try this with a classified raster]
+plot(ranSamps, add = T)
 ```
 
-### Writing an Image/Processing by Block
+Now, we use the `extract()` function to get the NVDI pixel values.
 
-Raster functions allow you to output/save any type of raster data to an external file so that it can be read into other programs (e.g., ArcGIS, QGIS). Use the `writeFormat()` function to determine the type of output datatypes that are available. Then, determine the datatype of each of the raster layers that you have created and write one of the raster layers to your working directory as a .tif.
+```{r}
+ndvivalues <- terra::extract(ndvi, ranSamps) 
+ndvivalues
+```
+
+This function is the base for many spatial analysis as it allows to extract pixel values from locations that can then be used as predictor variables in models. We will see that later on.
+
+### Writing an Image
+
+You can also save rasters to your hard drive so that it can be read into other programs (e.g., ArcGIS, QGIS). Use the `writeRester()` function.
 
 ```{r WriteImage, echo=F, evaluate=F}
-# Output file types
-writeFormats()
-
-# Determine data type of an object
-#dataType(ImageStack)
-dataType(ndvi)
-
 # Write a raster object to a file
 writeRaster(ndvi, filename="ndvi.tif", datatype="FLT4S", overwrite=TRUE)
 ```
@@ -299,38 +307,37 @@ Now let's conduct some simple analyses. Note that, for each functionality we try
 
 ### Step 1. Read in all the spatial data and visualize them together
 ```{r}
-birds <- readOGR(dsn = "data_IntroToGIS", layer = "Bird_pts")
-fences<- readOGR(dsn = "data_IntroToGIS", layer = "fences")
-habitat<- readOGR(dsn = "data_IntroToGIS", layer = "habitat")
-roads<- readOGR(dsn = "data_IntroToGIS", layer = "roads")
-landcover<- raster("data_IntroToGIS/landcover.img") # note that this is reading a raster file, so it is slightly different
-ndvi<- raster("data_IntroToGIS/ndvi250m.tif")
-
+birds <- st_read("data/Bird_pts.shp")
+fences<- st_read("data/fences.shp")
+habitat<- st_read("data/habitat.shp")
+roads<- st_read("data/roads.shp")
+landcover<- rast("data/landcover.img") 
+ndvi<- rast("data/ndvi250m.tif")
 ```
 
 ### Step 2. Check layer projection system and extent 
 
 ```{r}
-proj4string(birds) # we just check the projection of 2 files
-proj4string(landcover)
+crs(birds) # we just check the projection of 2 files
+crs(landcover)
 
-extent(birds)
-extent(landcover)
+ext(birds)
+ext(landcover)
 
 
 # copy and run the plotting code together to visulize them together 
 plot (landcover)
-plot(roads, ad=TRUE)
+plot(roads, add=TRUE)
 plot(habitat, add= TRUE)
 plot(fences, add=T)
 plot(birds, add=T)
 
 ```
 
-### Step 3. Calculate distance to vector lines and extract the distance value at the point location
+### Step 3. Calculate distance to vector lines
 
 ```{r distance function}
-canvas<- raster(extent(roads), crs=crs(roads), resolution=30)
+canvas<- rast(ext(roads), crs=crs(roads), resolution=30)
 road.r<- rasterize(roads, canvas)  # the distance function only works with raster data type, so here rasterize roads first
 distance<- distance(road.r)
 plot(distance)
@@ -341,19 +348,20 @@ plot(roads, add=T)
 
 ### Step 4. Calculate buffer area along the vector line
 
-Calculate 50m buffer and 500m buffer along the fence
+Calculate 50m buffer and 500m buffer along the fence and plot the results.
+Note that when plotting sf objects, a plot for each attribue is created. To avoid multiple plots, we can extract the geometry and plot that instead.
 ```{r buffer along line}
-fence_50m<- gBuffer(fences, width= 50)
-plot(fence_50m)
-fence_500m<- gBuffer(fences, width= 500)
-plot(fence_500m)
+fence_50m<- st_buffer(fences, 50)
+plot(st_geometry(fence_50m))
+fence_100m<- st_buffer(fences, 100)
+plot(st_geometry(fence_100m))
 ```
 
 Now we want to:
-Convert the buffer polygon to raster and change the values of all pixels within the 500m buffer area to 1, and the pixels outside the buffer area to 0
+Convert the buffer polygon to raster and change the values of all pixels within the 100m buffer area to 1, and the pixels outside the buffer area to 0
 
 ```{r}
-rasterize.buff<- rasterize(fence_500m, ndvi, field=1, background=0)
+rasterize.buff<- rasterize(fence_100m, ndvi, field=1, background=0)
 #Notice here we used an existing layer named ndvi as the template of the newly rasterized raster, the new rasterized layer will adapt the extent, the projection, and the pixel size of the template, which is convenient to us.  
 plot(rasterize.buff)
 ```
@@ -364,16 +372,16 @@ plot(rasterize.buff)
 Extract raster value at point locations, so we can quantify the environmental value captured by other raster data at the customized point locations. Notice that in order for the extract function to work, the points and the raster data need to cover the same extent and have the same projection. 
 
 ```{r}
-landcover.extract<- raster::extract(landcover, birds)
-birds@data   # this is the original data table
-birds.extract<- cbind(birds@data, landcover.extract)
+landcover.extract<- terra::extract(landcover, birds)
+birds   # this is the original data table
+birds.extract<- cbind(birds, landcover.extract)
 birds.extract # inspect the differences
 ```
 
 ### Step 6. Subset polygon based on attribute value
 
 ```{r}
-subset.habitat<- habitat[habitat$HABITAT =="Oak", ]
+subset.habitat<- habitat %>% filter(HABITAT =="Oak")
 par(mfrow= c(1,2))
 plot(habitat)
 plot(subset.habitat)
@@ -533,17 +541,6 @@ You can navigate the map and click on each country to query the population size.
 ### Creating our own high quality map.
 
 We will use the previous bird data to create a high quality map. 
-
-First, lets load some layers.
-
-```{r}
-birds <- st_read("./data/Bird_pts.shp")
-fences <- st_read("./data/fences.shp")
-habitat <- st_read("./data/habitat.shp")
-roads <- st_read("./data/roads.shp")
-```
-
-
 
 ```{r}
 tmap_mode("plot")
