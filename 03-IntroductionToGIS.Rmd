@@ -147,7 +147,7 @@ This is a very basic introduction to vector data. In future workflows, we will l
 
 Note that we have not plot any vector data yet. You can use the function `plot()` to plot sf, but the plots are not great. We will learn to use another package for making maps later.
 
-## Working with Raster Data in R
+## Raster Data in R
 
 Raster processing is an important aspect of building spatial datasets for further analysis. Doing so within [R](https://cran.r-project.org/) can greatly help streamline workflows, allowing for all analyses to be completed in a single program. Here, we will walk through a series of steps to provide the basic skills necessary for image analysis.
 
@@ -300,12 +300,12 @@ You can also save rasters to your hard drive so that it can be read into other p
 writeRaster(ndvi, filename="ndvi.tif", datatype="FLT4S", overwrite=TRUE)
 ```
 
-## Simple Spatial Analysis Functions in R
+## Spatial operations
 
 Now let's conduct some simple analyses. Note that, for each functionality we try to achieve here, there are multiple functions from different packages that can do the same job. Here we only introduce one way of doing it. When you are more familiar with R, you will develop your own preference in specific packages and functions. 
 
 
-### Step 1. Read in all the spatial data and visualize them together
+### Read in all the spatial data and visualize them together
 ```{r}
 birds <- st_read("data/Bird_pts.shp")
 fences<- st_read("data/fences.shp")
@@ -315,26 +315,7 @@ landcover<- rast("data/landcover.img")
 ndvi<- rast("data/ndvi250m.tif")
 ```
 
-### Step 2. Check layer projection system and extent 
-
-```{r}
-crs(birds) # we just check the projection of 2 files
-crs(landcover)
-
-ext(birds)
-ext(landcover)
-
-
-# copy and run the plotting code together to visulize them together 
-plot (landcover)
-plot(roads, add=TRUE)
-plot(habitat, add= TRUE)
-plot(fences, add=T)
-plot(birds, add=T)
-
-```
-
-### Step 3. Calculate distance to vector lines
+### Calculate distance to vector lines
 
 ```{r distance function}
 canvas<- rast(ext(roads), crs=crs(roads), resolution=30)
@@ -346,7 +327,7 @@ plot(roads, add=T)
 
 >What do you need to do to calculate the distance between each bird occurence location and the nearest road?
 
-### Step 4. Calculate buffer area along the vector line
+### Calculate buffer area along the vector line
 
 Calculate 50m buffer and 500m buffer along the fence and plot the results.
 Note that when plotting sf objects, a plot for each attribue is created. To avoid multiple plots, we can extract the geometry and plot that instead.
@@ -367,7 +348,7 @@ plot(rasterize.buff)
 ```
 
 
-### Step 5. Extract raster value at point location
+### Extract raster value at point location
 
 Extract raster value at point locations, so we can quantify the environmental value captured by other raster data at the customized point locations. Notice that in order for the extract function to work, the points and the raster data need to cover the same extent and have the same projection. 
 
@@ -378,7 +359,7 @@ birds.extract<- cbind(birds, landcover.extract)
 birds.extract # inspect the differences
 ```
 
-### Step 6. Subset polygon based on attribute value
+### Subset polygon based on attribute value
 
 ```{r}
 subset.habitat<- habitat %>% filter(HABITAT =="Oak")
@@ -387,8 +368,7 @@ plot(habitat)
 plot(subset.habitat)
 ```
 
->How do you select only the polygon with area larger than 100,000 square meter? 
-
+>How do you select only the polygon with area larger than 100,000 square meters? 
 
 ## Making pretty maps with R
 
