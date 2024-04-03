@@ -1,0 +1,57 @@
+---
+title: "Introduction to spatial ecology with R"
+author: "Ramiro D Crego"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output:
+  html_document:
+    toc: yes
+    toc_float: 
+      collapsed: true
+      smooth_scroll: true
+    number_sections: true
+knit: (function(input_file, encoding) {
+  out_dir <- 'docs';
+  rmarkdown::render(input_file,
+ encoding=encoding,
+ output_file=file.path(dirname(input_file), out_dir, 'index.html'))})
+---
+
+# Foreword
+
+Geographic Information Systems, use of satellite imagery, modeling, and mapping have become essentials in the toolbox of many researchers, natural resource managers, and conservationists. Yet, these resources are often not readily accessible to practitioners around the world. Most restrictive is the limited access to specialized and expensive commercial software. In recent years, several powerful open-source tools for geospatial analysis have emerged. R is a widely used statistical programming language with considerable geospatial analysis capabilities. This training focuses on performing geospatial work in R.
+
+## Learning Outcomes
+
+By the end of these tutorials, you will be able to:
+
+1. Understand R coding language
+2. Understand how to troubleshoot for R errors
+3. Perform database and spatial queries in R
+4. Create and import spatial data in R
+5. Know basic raster and vector analysis functions in R
+6. Project spatial data in R
+7. Use R to create maps and visualize data
+8. Extract environmental values for spatial points and regions
+9. Fit Generalized Linear Models and predictions over space
+10. Learn to simulate that and the basics of Bayesian statistics.
+
+## About this material
+
+This content has been the product of years of work and collaborations with many amazing people. Some of the code has been provided by them.
+
+I thank Dr. Jared Stabach and Dr. Quingyu Huangm, Dr. Grant Connette, and Dr. Joseph Kolowski for their inputs.
+
+## Required software
+
+During the course, students will use R and R-Studio. R is a programming language and free software environment for statistical computing widely used by researchers. R-Studio is an integrated development environment for R that makes the software more user friendly. Both R and R-Studio are compatible with the most common operating systems and are free to use. Before the course begins, you should have the software installed on your personal computers. Installation files can be accessed at:
+
+-R: https://www.r-project.org
+
+-RStudio Desktop: https://rstudio.com/products/rstudio/
+
+```{r child = '01-IntroductionToR.Rmd'}
+```
+
+```{r child = '02-IntroDataAnalysis.Rmd'}
+```
+
