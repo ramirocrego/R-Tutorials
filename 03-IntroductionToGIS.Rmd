@@ -273,7 +273,7 @@ We will see how to extract pixel values from the NDVI raster. For this example, 
 
 ```{r PixelExtraction}
 # Select random samples (pixels) from a raster
-ranSamps <- st_sample(st_bbox(ndvi), size=10, type = "random")
+ranSamps <- st_sample(st_as_sfc(st_bbox(ndvi)), size=10, type = "random")
 ranSamps <- st_as_sf(ranSamps) #Convert to simple feature collection
 ranSamps
 
