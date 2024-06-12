@@ -51,7 +51,7 @@ During the course, students will use R and R-Studio. R is a programming language
 
 ## Data access
 
-All the data used in the tutorials are available in this [link](https://github.com/ramirocrego/R-Tutorials/tree/main)
+All the data used in the tutorials are available in this [link](https://github.com/ramirocrego/R-Tutorials/)
 
 
 ```{r child = '01-IntroductionToR.Rmd'}
