@@ -28,12 +28,6 @@ Now, let's change the working directory to a location of your choosing. Create a
 setwd("C:/....")
 ```
 
-You can also work with **R projects**. R projects have the advantage that they enhance organization, collaboration, and reproducibility in R-based work by providing a structured and isolated workspace for your projects. They contribute to a more efficient and transparent workflow, particularly when working on multiple projects or collaborating with others.
-
-The main advantage is that R Projects create a dedicated workspace for your R-related work, keeping all files, scripts, data, and outputs within a well-defined directory. This isolation helps avoid conflicts between projects and ensures a clean environment for each project. R projects use relative paths, allowing you to refer to files and directories within the project without specifying the full path. This enhances portability and makes it easier to share your project with others.
-
-To start a new R Project click File > New Project or directly click on the R Project icon and follow the directions. You can set up your new project on a new folder or an existing folder.
-
 ## Data Management and Data Manipulation 
 
 ### Exploring the Data

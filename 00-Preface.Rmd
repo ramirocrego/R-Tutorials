@@ -2,6 +2,7 @@
 title: "Introduction to spatial ecology with R"
 author: "Ramiro D Crego, Jared Stabach"
 date: "`r format(Sys.time(), '%d %B %Y')`"
+always_allow_html: true
 output:
   html_document:
     toc: yes

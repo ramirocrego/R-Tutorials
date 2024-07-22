@@ -406,6 +406,7 @@ Here a simple example:
 
 ```{r}
 # Add fill layer to nz shape
+data(world)
 tm_shape(world) +
   tm_fill() 
 # Add border layer to nz shape

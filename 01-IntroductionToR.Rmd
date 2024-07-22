@@ -22,19 +22,19 @@ Our advice is to push yourself to use this tool in everything you do.  At first,
 
 **R** is available for Linux, MacOS X, and Windows (95 or later) platforms. Software can be downloaded from one of the [Comprehensive R Archive Network](https://cran.r-project.org/) (CRAN) mirror sites. Once installed, **R** will open a console where you run code. You can also work on a script file, where you can write and save your work, and other windows that will show up on demand such as the plot tab (Fig. 1). 
 
-![Figure 1. R console, script and plot tabs.](FIGURES/IntroToR_Fig1.png)
+![R console, script and plot tabs.](FIGURES/IntroToR_Fig1.png)
 
 
 **RStudio** is an enterprise-ready professional software tool that integrates with **R**.  It has some nice features beyond the normal **R** interface, which many users feel it is easier to use than **R** (Fig. 2). Once you have installed **R**, you should also download and install [RStudio](https://www.rstudio.com/products/rstudio/download/).  For this course, we will work exclusively in *RStudio*.
 
-![Figure 2. RStudio sowfware](FIGURES/IntroToR_Fig2.png)
+![RStudio sowfware](FIGURES/IntroToR_Fig2.png)
 
 
 ## Getting Help
 
 One of the most useful commands in **R** is `?`.  At the command prompt (signified by `>` in your Console window), type `?` followed by any command and you will be prompted with a help tab for that command (e.g., `?mean` Fig. 3). You can also search through the help tab directly by searching functions on the search bar. 
 
-![Figure 3. Getting help on R.](FIGURES/IntroToR_Fig3.png)
+![Getting help on R.](FIGURES/IntroToR_Fig3.png)
 
 The internet also contains a vast quantity of useful information.  There are blogs, mailing lists, and various websites (e.g., https://stackoverflow.com/) dedicated to providing information about **R**, its packages, and potential error messages that you may encounter (among other things).  The trick is usually determining the key terms to limit your search.  I generally start any web-based search with **"R-Cran"**, which limits and focuses the search.  Using "**R**" as part of your key terms does not, by itself, limit the search.
 
@@ -72,7 +72,15 @@ setwd("C:/Documents/R_Practice")
 
 In *RStudio*, you can do some basic operations, such as setting your working directory, using the point-and-click interface: Session > Set Working Directory > Choose Directory ... as shown in Fig. 4.
 
-![Figure 4. Setting working directory in RStudio](FIGURES/IntroToR_Fig4.png)
+![Setting working directory in RStudio](FIGURES/IntroToR_Fig4.png)
+
+You can also work with **R projects**. R projects have the advantage that they enhance organization, collaboration, and reproducibility in R-based work by providing a structured and isolated workspace for your projects. They contribute to a more efficient and transparent workflow, particularly when working on multiple projects or collaborating with others.
+
+The main advantage is that R Projects create a dedicated workspace for your R-related work, keeping all files, scripts, data, and outputs within a well-defined directory. This isolation helps avoid conflicts between projects and ensures a clean environment for each project. R projects use relative paths, allowing you to refer to files and directories within the project without specifying the full path. This enhances portability and makes it easier to share your project with others.
+
+To start a new R Project click File > New Project or directly click on the R Project icon and follow the directions. You can set up your new project on a new folder or an existing folder.
+
+![RStudio sowfware](FIGURES/IntroToR_Fig5.png)
 
 ## **R** Fundamentals 
 ### Data Types

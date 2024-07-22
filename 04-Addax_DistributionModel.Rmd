@@ -22,7 +22,7 @@ In this case study, we will demonstrate how to combine the skills learned in GIS
 
 One of the most difficult (and perhaps most time consuming) aspects of conducting a spatial analysis is the construction of the spatial database. Main components include locating and downloading available spatial data, mosaicking (if necessary) multiple tiles together, reprojecting the data so that all layers have the same coordinate reference system (CRS), and resampling the cell sizes to match. 
 
-Multiple sources now exist for finding available spatial data, which include [EarthExplorer](http://earthexplorer.usgs.gov/) and [Google Earth Engine](https://earthengine.google.com/).  Some layers, however, can also be directly accessed within [R](https://cran.r-project.org/) using the [raster](https://cran.r-project.org/web/packages/raster/index.html), [Dismo](https://cran.r-project.org/web/packages/dismo/index.html) and [MODIS](https://cran.r-project.org/web/packages/MODIS/index.html) packages (among others).
+Multiple sources now exist for finding available spatial data, which include [EarthExplorer](http://earthexplorer.usgs.gov/) and [Google Earth Engine](https://earthengine.google.com/).  Some layers, however, can also be directly accessed within [R](https://cran.r-project.org/) using the `geodata` package (among others).
 
 ### Load Packages
 Like other exercises in [R](https://cran.r-project.org/), we will first load the necessary packages to perform the analyses. Use `help()` for any operations that you don't understand or that require additional information.  
@@ -52,7 +52,7 @@ Addax
 ```
 
 ### Raster Data
-[R](https://cran.r-project.org/) has a number of options for directly importing remotely sensed data into the console.  Here, we will import a NDVI data layer (a .tif file) that I downloaded from [EarthExplorer](http://earthexplorer.usgs.gov/). This layer is located in your data directory and has already been re-projected to UTM 32N WGS84 and clipped to the study area. We will also use functions in the [raster](https://cran.r-project.org/web/packages/raster/index.html) package to load a 90-m elevation dataset.  Both layers must exactly match each other (same CRS, extent, grid cell size) in order to predict with the rasters.
+[R](https://cran.r-project.org/) has a number of options for directly importing remotely sensed data into the console.  Here, we will import a NDVI data layer (a .tif file) that I downloaded from [EarthExplorer](http://earthexplorer.usgs.gov/). This layer is located in your data directory and has already been re-projected to UTM 32N WGS84 and clipped to the study area. We will also use functions in the `terra` package to load a 90-m elevation dataset.  Both layers must exactly match each other (same CRS, extent, grid cell size) in order to predict with the rasters.
 
 ```{r Raster Data, eval=T}
 # NDVI - Normalized Difference Vegetation Index (250-m)
