@@ -64,8 +64,11 @@ All the data used in the tutorials are available in this [link](https://github.c
 ```{r child = '02-IntroDataAnalysis.Rmd'}
 ```
 
-```{r child = '03-IntroductionToGIS.Rmd'}
+```{r child = '03-GGplot2.Rmd'}
 ```
 
-```{r child = '04-Addax_DistributionModel.Rmd'}
+```{r child = '04-IntroductionToGIS.Rmd'}
+```
+
+```{r child = '05-Addax_DistributionModel.Rmd'}
 ```

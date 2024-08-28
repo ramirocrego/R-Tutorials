@@ -1,0 +1,390 @@
+# An introduction to plotting using ggplot2
+
+The package `ggplot2` is widely used for data visualization in R. This package is extremelly powerful. I used to like using basic R code for plotting but eventually, I had to admit that ggplot is extremelly cool and had to adopt it. 
+
+`ggplot2`is based on the grammar of graphics, which allows users to create complex plots from data in a systematic way.
+
+I will first present you the basics of `ggplot2` using the same `mtcars` dataset and then I will present you the code of different figures I used in my publications. 
+
+As with any R package, before you can use ggplot2, you need to install it (if you haven't already) and load it into your R session.
+
+```{r}
+#install.packages("ggplot2")
+library(ggplot2)
+```
+
+## Basic Concepts
+
+There are a few concepts that we need to know to understand how to code ggplots. 
+
+Data: The dataset you want to visualize.
+Aesthetics (aes): The visual properties of the plot (e.g., x and y position, color, size).
+Geometries (geom_): The actual marks we put on the plot (e.g., points, lines, bars). We can, for instance, use geom_line() for plotting lines.
+Facets: Subplots that display subsets of the data.
+Scales: Control how data values are mapped to visual properties.
+Themes: Control the overall appearance of the plot (e.g., font size, background color).
+
+## Creating Your First Plot
+
+Let’s start with a simple scatter plot using the built-in mtcars dataset. We have created this plot before, so the look should be familiar to you.
+
+### A basic scatter plot
+
+```{r}
+ggplot(data = mtcars, aes(x = wt, y = mpg)) +
+  geom_point()
+```
+
+In here, `ggplot(data = mtcars, aes(x = wt, y = mpg))` initializes the plot with the `mtcars` dataset, setting `wt` (weight) on the x-axis and `mpg` (miles per gallon) on the y-axis.
+`geom_point()` adds points to the plot to create a scatter plot.
+
+### Customizing the plot
+
+#### Titles and labels
+We now have a basic plot. Let's start to customize it. We will first add a title, subtitle, and axis labels with the `labs()` function.
+
+```{r}
+ggplot(data = mtcars, aes(x = wt, y = mpg)) +
+  geom_point() +
+  labs(title = "Scatter Plot of MPG vs Weight",
+       subtitle = "Data from mtcars dataset",
+       x = "Weight (1000 lbs)",
+       y = "Miles Per Gallon",
+       caption = "Source: mtcars dataset")
+```
+
+#### Color and size
+
+We can also change the point color and sizes by specifying color and size to variables in the data. For this we need to specify in the aesthetics which variables represent color and size. Then we need to use `scale_color_continuous()` and `scale_size_continuous()` to set the names on the legend.
+
+```{r}
+ggplot(data = mtcars, aes(x = wt, y = mpg, color = as.numeric(cyl), size = hp)) +
+  geom_point() +
+  labs(title = "Scatter Plot with Color and Size Mappings",
+       x = "Weight (1000 lbs)",
+       y = "Miles Per Gallon") +
+  scale_color_continuous(name = "Number of Cylinders") +
+  scale_size_continuous(name = "Horsepower")
+```
+Looking pretty good. 
+
+#### Linear trends
+
+What if we want to add a line trend?
+
+We can use the `geom_smooth()` function to add a linear trend. Method refers to the moothing method (function). Here we use a linear model. se controls whether you plot the standard error. And color controls the color of the line.
+
+```{r}
+ggplot(data = mtcars, aes(x = wt, y = mpg)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = T, color = "blue") +
+  labs(title = "Scatter Plot with Linear Regression Line",
+       x = "Weight (1000 lbs)",
+       y = "Miles Per Gallon")
+```
+
+Check the help on `geom_smooth()` for other methods, like gam models. 
+
+#### Facets
+
+Faceting allows you to create multiple plots based on a categorical variable. This is very nice. Let's generate different plots for cars with different number of cylinders. 
+
+```{r}
+ggplot(data = mtcars, aes(x = wt, y = mpg)) +
+  geom_point() +
+  facet_wrap(~ cyl) +
+  labs(title = "Scatter Plot Faceted by Number of Cylinders",
+       x = "Weight (1000 lbs)",
+       y = "Miles Per Gallon")
+```
+
+### Using Different Geometries
+
+Let's try now different geometries.
+
+#### Bar Plot
+
+For a bar plot we use `geom_bar()`.
+
+```{r}
+ggplot(data = mtcars, aes(x = factor(cyl))) +
+  geom_bar() +
+  labs(title = "Bar Plot of Cylinder Counts",
+       x = "Number of Cylinders",
+       y = "Count")
+```
+
+#### Histogram
+
+For a histogram we use `geom_histogram()`.
+
+```{r}
+ggplot(data = mtcars, aes(x = mpg)) +
+  geom_histogram(binwidth = 2, fill = "blue", color = "black") +
+  labs(title = "Histogram of Miles Per Gallon",
+       x = "Miles Per Gallon",
+       y = "Count")
+```
+
+#### Box Plot
+
+We use `geom_box()` for a boxplot.
+
+```{r}
+ggplot(data = mtcars, aes(x = factor(cyl), y = mpg)) +
+  geom_boxplot() +
+  labs(title = "Box Plot of MPG by Number of Cylinders",
+       x = "Number of Cylinders",
+       y = "Miles Per Gallon")
+```
+#### Vilolin Plot
+
+We use `geom_violin()` for a violin plot. Sometimes, violin plots can represent better the distribution of the data.
+
+```{r}
+ggplot(data = mtcars, aes(x = factor(cyl), y = mpg)) +
+  geom_violin() +
+  labs(title = "Box Plot of MPG by Number of Cylinders",
+       x = "Number of Cylinders",
+       y = "Miles Per Gallon")
+```
+
+### Customizing the plot appearance
+
+#### Themes
+
+The `themes` control the overall look of your plot. There are many themes available. For isntance, we can use `theme_minimal()`.
+
+```{r}
+ggplot(data = mtcars, aes(x = wt, y = mpg)) +
+  geom_point() +
+  theme_minimal() +
+  labs(title = "Scatter Plot with Minimal Theme",
+       x = "Number of Cylinders",
+       y = "Miles Per Gallon")
+```
+
+Other available themes include `theme_gray()`, `theme_classic()`, `theme_bw()`, and more. Check them out yourself.
+
+#### Customizing scales
+
+You can customize the scales of axes, colors, and other aesthetics. In this case, we are colouring the dots based on horsepower using the function `scale_color_gradient()` and setting the range of colors from blue (low) to red (high).
+
+```{r}
+ggplot(data = mtcars, aes(x = wt, y = mpg, color = hp)) +
+  geom_point() +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(title = "Scatter Plot with Custom Color Scale",
+       x = "Weight (1000 lbs)",
+       y = "Miles Per Gallon",
+       color = "Horsepower")
+```
+#### Adding Annotations
+
+You can add annotations to your plots. This can be useful to highlite something in your plot.
+
+```{r}
+ggplot(data = mtcars, aes(x = wt, y = mpg)) +
+  geom_point() +
+  annotate("text", x = 5, y = 30, label = "High MPG", color = "red") +
+  labs(title = "Scatter Plot with Annotation",
+       x = "Weight (1000 lbs)",
+       y = "Miles Per Gallon")
+```
+
+#### Multi-layered plots
+
+Something very good about ggplot is that it is very easy to add multiple layers to the same plot. You can combine different geoms in one plot using the same or different data.
+
+```{r}
+ggplot(data = mtcars, aes(x = wt, y = mpg)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  geom_smooth(method = "loess", se = FALSE, color = "red") +
+  labs(title = "Scatter Plot with Multiple Trend Lines",
+       x = "Weight (1000 lbs)",
+       y = "Miles Per Gallon")
+```
+
+
+With ggplot2, you have a powerful tool to explore and present your data in compelling ways.
+
+There are many options that you can control on ggplot. The best way to learn all the possibilities is by playing with it. Pretty much, everything can be customized. Googling anything you want to do is one of the best ways to troubleshoot. 
+
+Feel free to experiment with different datasets and ggplot2 functions to create the visualizations that best communicate your insights!
+
+### Saving Your Plot
+
+To save your plot to a file use the function `ggsave()`. Note that first you need to save your plot as an object.
+
+```{r, eval=FALSE}
+p <- ggplot(data = mtcars, aes(x = wt, y = mpg)) +
+  geom_point() +
+  labs(title = "Scatter Plot of MPG vs Weight")
+
+ggsave("scatter_plot.png", plot = p, width = 6, height = 4)
+```
+
+## Examples from my work
+
+I want to show you now some more advanced plots I have created though the years for different publications and presentations.
+
+### Example 1
+
+The firsts examples come from this [manuscript](https://drive.google.com/open?id=1JNMYB8qkE64rUN-f8ilDPHtAH9UJH0ya&usp=drive_fs).
+
+In this study, I used a multi-species occupancy model and look at species richness of large herbivores relationships with different covariables and land uses in central Kenya.
+
+I created a violin plot for figure 1 of the article to show how species richness varies across years at each land use.
+
+Let's load the data.
+
+```{r}
+data <-read.csv("data/forplot.csv")
+colnames(data)[3:5]<-c("DistanceToWater","NDVI","LivestockAbundance")
+```
+
+Now we will create the plot. We specify the aesthetics with `Year` in the x axis, `SR` (Species richness) in the y axis, and `Year` as the grouping factor. We use `geom_violin()` to create the violin plot. I used a cool function, `stat_summary()` to plot the mean and standard deviation of species richness within each violin plot. I faceted the plot by land use. I used the theme gray (`theme_gray()`). With `labs()`, we speciy the labels. And finally, within the function `theme()` we make more customizations, such as, setting font size of axes, titles, and labels.
+
+```{r}
+ggplot(data, aes(x=Year, y=SR, group = Year)) + geom_violin() + stat_summary(fun.data="mean_sdl",  fun.args = list(mult=1), geom="pointrange", color = "black") + facet_wrap (~LandUse, ncol=5) + theme_gray() + labs(x = "Year", y = "Estimated point sp. richness") + theme(axis.text = element_text(size = 10), axis.title = element_text(size = 12), strip.text = element_text(size=12))
+```
+In that same paper, I wanted to show the relationship of species richness with livestock abundance. I then created this scatter plot, showing how species richness declines with increasing livestock but highlighting the differences among land uses. 
+
+Here, I used the `geom_point()` and the `stat_smooth()` to create trends based on gam models for each land use. Note that I specified `LandUse` as the grouping and color factor in the aesthetics. I customized the colors using `scale_color_manual()`. I set a black and white theme. And with the `theme()` function, I set the position of the legend (getting the position right requires a lot of trial and error). Change it and you will understand. I also customized font sizes. 
+
+```{r}
+ggplot(data, aes(x=LivestockAbundance, y=SR, group=LandUse, color=LandUse)) + geom_point() + stat_smooth(aes(x=LivestockAbundance, y=SR), method = "gam", formula = y ~ s(x)) +
+  scale_color_manual(name = "Land use", values = c("#FF7F00", "#8B0000", "#66CD00","#006400")) +
+  labs(x = "Livestock abundance", y = "") +
+  theme_bw() +
+  theme(legend.position=c(0.8,0.8),legend.title=element_text(size=14),legend.text=element_text(size=12), axis.text = element_text(size = 14), axis.title = element_text(size=15))
+```
+
+Here is the same plot faceted by year.
+
+```{r}
+ggplot(data, aes(x=LivestockAbundance, y=SR, group=LandUse, color=LandUse)) + facet_wrap(~ Year, ncol=3) + geom_point() +
+  stat_smooth(aes(x=LivestockAbundance, y=SR), method = "gam", formula = y ~ x) +
+  scale_color_manual(name = "Land use", values = c("#FF7F00", "#8B0000", "#66CD00","#006400")) +
+  labs(x = "Livestock abundance", y = "Estimated point species richness") +
+  theme_bw() +
+  theme(legend.position=c(0.85,0.12),legend.title=element_text(size=14),legend.text=element_text(size=12)) +
+  theme(axis.text = element_text(size = 11), axis.title = element_text(size = 15), strip.text = element_text(size=15))
+```
+Very cool!!
+
+### Example 2
+
+The second example come from this [manuscript](https://drive.google.com/open?id=18IZYPB0nHN-PfHhrly26Py3StwCswrqh&usp=drive_fs).
+
+In this study, we combined eight 2-km long transects surveyed monthly between October 2017 and March 2020 with a hierarchical multi-species and multi-season distance sampling modelling framework to: (1) estimate monthly density of an ensemble of 10 different large herbivores and (2) understand how species respond to changes in vegetation productivity and time across the Naboisho Conservancy in the Greater Mara Ecosystem, Kenya.
+
+This first plot shows the average density of species across time with corresponding credible intervals.
+
+Load the data. The data for plotting are organised in lists. The first plot uses the first element of datalist, while the second plot uses 3 different datasets contained in datalist2.
+
+```{r}
+load('./data/ListForPlotData')
+load('./data/ListForPlotData2')
+```
+
+You can inspect the data we are going to use.
+
+```{r}
+head(datalist[[1]])
+head(datalist2[[1]])
+head(datalist2[[2]])
+head(datalist2[[3]])
+```
+
+
+This first plot, what is Fig. 2 in the manuscript, shows the changes in monthly abundance for each species.
+
+This plot uses `geom_point()` and `facet_wrap()` as before. To plot the credible intervals around the density estimates, I use the `geom_errorbar()` function to which you need to specify the `ymin` and `ymax` values. Also note the use of `scale_x_date()` to set the x label as dates. 
+
+```{r}
+ggplot(datalist[[1]], aes(x=as.Date(Date), y=MedianAb)) + 
+  facet_wrap(~Species, scales="free_y", nrow = 4, ncol = 3) + labs(y="Estimated ind/km2", x = "Time") + geom_point(size=2) + geom_errorbar(aes(ymin = CI_low, ymax = CI_high), width = 0.5) + theme(axis.text=element_text(size=8),  axis.title=element_text(size=12), axis.line=element_line(size=0.5), axis.ticks=element_line(size=0.5),  strip.text=element_text(size=11), strip.background=element_blank(), panel.border=element_blank(), panel.grid=element_blank(), legend.position = c(0.85, 0.1), legend.title = element_blank()) + scale_x_date(date_breaks = "6 months", date_labels = "%Y %b") 
+
+```
+
+The next plot is quite complex. It consists of 3 different datasets, showing the full potential of ggplot. 
+
+The plot shows the response in each species abundance (as estimated number of groups) to vegetation productivity (as NDVI). This is Fig.4 of the manuscript. 
+There are 3 different datasets because the hierarchical multi-species and multi-year model allow you to get estimates for each month, but also an average for each species across all months, and a community average. 
+
+The first dataset (datalist2[[1]]) contains estimated number of groups per species and per month for a range of NDVI values. The second dataset (datalist2[[2]]), contains the average estimate of number of groups per species across all months The third dataset (datalist2[[3]]) contains the average estimated number of groups for the 'community' (i.e., the assemblage of all species included in the analysis).
+
+Let's plot one by one, and then we combine them all together.
+
+Here, we have the estimated number of groups in the `y` axis as a function of NDVI in the `x` axis for each month. So, each line represents a different months `group = factor(time)`. We use `geom_line()` to plot the lines. We facet by species letting the y axis change freely among species `facet_wrap(~Species, scales="free_y")`. 
+
+```{r}
+ggplot(datalist2[[1]], aes(x = x, y = y, group = factor(time))) + facet_wrap(~Species, scales="free_y") + geom_line(colour = 'grey') +
+  labs(y=expression("Nr. of groups"), x = "NDVI") +
+  theme(axis.text=element_text(size=11), 
+        axis.title=element_text(size=12), 
+        axis.line=element_line(linewidth=0.5),
+        axis.ticks=element_line(linewidth=0.5), 
+        strip.text=element_text(size=11), 
+        strip.background=element_blank(), 
+        panel.border=element_blank(), 
+        panel.grid=element_blank(), legend.position = 'none') +
+  scale_color_manual(values = rep('darkgray', 34))
+```
+
+We will now plot the second dataset. In this case, we have the average estimate of number of groups across all months. Note that we have now crebidle intervals for the estimations of number of groups. In this case, we use the function `geom_ribbon()` to plot the credible intervals. The alpha arguments controls the transparency. 
+
+```{r}
+ggplot(datalist2[[2]], aes(x = x, y = y, group = Species)) + facet_wrap(~Species, scales="free_y") + geom_line(linewidth=1, colour = 'blue') + geom_ribbon(data = datalist2[[2]], aes(ymin = yLower, ymax = yUpper, group = Species), fill = "blue", alpha = 0.5) +
+  labs(y=expression("Nr. of groups"), x = "NDVI") +
+  theme(axis.text=element_text(size=11), 
+        axis.title=element_text(size=12), 
+        axis.line=element_line(linewidth=0.5),
+        axis.ticks=element_line(linewidth=0.5), 
+        strip.text=element_text(size=11), 
+        strip.background=element_blank(), 
+        panel.border=element_blank(), 
+        panel.grid=element_blank(), legend.position = 'none')
+```
+
+Finally, we have a plot for the community.
+
+```{r}
+ggplot(datalist2[[3]], aes(x = x, y = y, group = Species)) + facet_wrap(~Species, scales="free_y") +  geom_ribbon(aes(ymin = yLower, ymax = yUpper, group = Species), fill = 'black', alpha = 0.5) + geom_line(linewidth=1, colour = 'black') +
+  labs(y=expression("Nr. of groups"), x = "NDVI") +
+  theme(axis.text=element_text(size=11), 
+        axis.title=element_text(size=12), 
+        axis.line=element_line(linewidth=0.5),
+        axis.ticks=element_line(linewidth=0.5), 
+        strip.text=element_text(size=11), 
+        strip.background=element_blank(), 
+        panel.border=element_blank(), 
+        panel.grid=element_blank(), legend.position = 'none')
+```
+
+We can now combine all datasets in the same plot by adding multiuple layers, each time specifying the new dataset. So, there are a few modifications to the code of each individual plot. This is the final code:
+
+```{r}
+ggplot(datalist2[[1]], aes(x = x, y = y, group = factor(time))) + facet_wrap(~Species, scales="free_y") + geom_line(colour = 'grey') + geom_ribbon(data = datalist2[[2]], aes(ymin = yLower, ymax = yUpper, group = Species), fill = "blue", alpha = 0.5) + geom_line(data = datalist2[[2]], aes(x = x, y = y, group = Species), linewidth=1, colour = 'blue') +  geom_ribbon(data = datalist2[[3]], aes(ymin = yLower, ymax = yUpper, group = Species), fill = 'black', alpha = 0.5) + geom_line(data = datalist2[[3]], aes(x= x, y = y, group = Species), linewidth=1, colour = 'black') +
+  labs(y=expression("Nr. of groups"), x = "NDVI") +
+  theme(axis.text=element_text(size=11), 
+        axis.title=element_text(size=12), 
+        axis.line=element_line(linewidth=0.5),
+        axis.ticks=element_line(linewidth=0.5), 
+        strip.text=element_text(size=11), 
+        strip.background=element_blank(), 
+        panel.border=element_blank(), 
+        panel.grid=element_blank(), legend.position = 'none') +
+  scale_color_manual(values = rep('darkgray', 34))
+```
+
+Note, that for the community plot to be added to the facets, the data frame needs to have a column call `Species` with the name `Community`. The Species column in each dataset needs to be specified as a factor with all the levels corresponding to all species plus community as shown here: 
+
+```{r, eval = F}
+factor(data$Species, levels= c("Hartebeest", 'Eland','Giraffe',"Grant's gazelle",'Impala',"Thomson's gazelle",'Topi','Warthog','Wildebeest',"Plains zebra", "Community"))
+```
+
+Stay tunned for more examples.
+
