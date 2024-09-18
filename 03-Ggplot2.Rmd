@@ -66,6 +66,7 @@ ggplot(data = mtcars, aes(x = wt, y = mpg, color = as.numeric(cyl), size = hp)) 
   scale_color_continuous(name = "Number of Cylinders") +
   scale_size_continuous(name = "Horsepower")
 ```
+
 Looking pretty good. 
 
 #### Linear trends
@@ -179,6 +180,7 @@ ggplot(data = mtcars, aes(x = wt, y = mpg, color = hp)) +
        y = "Miles Per Gallon",
        color = "Horsepower")
 ```
+
 #### Adding Annotations
 
 You can add annotations to your plots. This can be useful to highlite something in your plot.
@@ -249,6 +251,7 @@ Now we will create the plot. We specify the aesthetics with `Year` in the x axis
 ```{r}
 ggplot(data, aes(x=Year, y=SR, group = Year)) + geom_violin() + stat_summary(fun.data="mean_sdl",  fun.args = list(mult=1), geom="pointrange", color = "black") + facet_wrap (~LandUse, ncol=5) + theme_gray() + labs(x = "Year", y = "Estimated point sp. richness") + theme(axis.text = element_text(size = 10), axis.title = element_text(size = 12), strip.text = element_text(size=12))
 ```
+
 In that same paper, I wanted to show the relationship of species richness with livestock abundance. I then created this scatter plot, showing how species richness declines with increasing livestock but highlighting the differences among land uses. 
 
 Here, I used the `geom_point()` and the `stat_smooth()` to create trends based on gam models for each land use. Note that I specified `LandUse` as the grouping and color factor in the aesthetics. I customized the colors using `scale_color_manual()`. I set a black and white theme. And with the `theme()` function, I set the position of the legend (getting the position right requires a lot of trial and error). Change it and you will understand. I also customized font sizes. 
@@ -272,6 +275,7 @@ ggplot(data, aes(x=LivestockAbundance, y=SR, group=LandUse, color=LandUse)) + fa
   theme(legend.position=c(0.85,0.12),legend.title=element_text(size=14),legend.text=element_text(size=12)) +
   theme(axis.text = element_text(size = 11), axis.title = element_text(size = 15), strip.text = element_text(size=15))
 ```
+
 Very cool!!
 
 ### Example 2
@@ -385,6 +389,41 @@ Note, that for the community plot to be added to the facets, the data frame need
 ```{r, eval = F}
 factor(data$Species, levels= c("Hartebeest", 'Eland','Giraffe',"Grant's gazelle",'Impala',"Thomson's gazelle",'Topi','Warthog','Wildebeest',"Plains zebra", "Community"))
 ```
+
+### Example 3. Using phylopics. 
+
+Phylopic is a free database of silhouetted images of organisms. You can access those iamges and use them in your scientific figures. In R, you can use the `rphylopic` package to download and incorporate these silhouettes into your ggplot2 visualizations. Pretty cool. Here’s an example to get you started with using Phylopic silhouettes in R with ggplot2.
+
+First, let's load the package (and install it if you do not have done it yet).
+
+```{r}
+library(rphylopic)
+```
+
+The first thing we need to do to use a Phylopic image, is to search for the desired organism and retrieve its unique identifier (UUID). The rphylopic package provides functions to search and download these images.
+
+Here’s how you can search for and download a Phylopic image of a giraffe. First we search for the images available with the `pick_phylopic()` function. Some species have multiple options to chose from. Here I am asking R to display no more than 4 images.
+
+```{r}
+giraffe <- search_phylopic(name = "Giraffa camelopardalis", n = 4, view = 4)
+```
+
+One you know which image you want to use, you retrieve the unique identifier using `get_uuid()`.
+
+```{r}
+giraffe <- get_uuid(name = "Giraffa camelopardalis", n = 1)
+giraffe
+```
+
+Now, let's save this uuid in a data.frame. Note, you could add more species.
+
+```{r}
+phylopicsuuid <- data.frame(Species = "Giraffe", 
+                            uuid = c(giraffe))
+```
+
+
+
 
 Stay tunned for more examples.
 
