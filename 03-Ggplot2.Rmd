@@ -11,6 +11,7 @@ As with any R package, before you can use ggplot2, you need to install it (if yo
 ```{r}
 #install.packages("ggplot2")
 library(ggplot2)
+library(dplyr)
 ```
 
 ## Basic Concepts
@@ -248,7 +249,7 @@ colnames(data)[3:5]<-c("DistanceToWater","NDVI","LivestockAbundance")
 
 Now we will create the plot. We specify the aesthetics with `Year` in the x axis, `SR` (Species richness) in the y axis, and `Year` as the grouping factor. We use `geom_violin()` to create the violin plot. I used a cool function, `stat_summary()` to plot the mean and standard deviation of species richness within each violin plot. I faceted the plot by land use. I used the theme gray (`theme_gray()`). With `labs()`, we speciy the labels. And finally, within the function `theme()` we make more customizations, such as, setting font size of axes, titles, and labels.
 
-```{r}
+```{r, message=FALSE}
 ggplot(data, aes(x=Year, y=SR, group = Year)) + geom_violin() + stat_summary(fun.data="mean_sdl",  fun.args = list(mult=1), geom="pointrange", color = "black") + facet_wrap (~LandUse, ncol=5) + theme_gray() + labs(x = "Year", y = "Estimated point sp. richness") + theme(axis.text = element_text(size = 10), axis.title = element_text(size = 12), strip.text = element_text(size=12))
 ```
 
@@ -256,7 +257,7 @@ In that same paper, I wanted to show the relationship of species richness with l
 
 Here, I used the `geom_point()` and the `stat_smooth()` to create trends based on gam models for each land use. Note that I specified `LandUse` as the grouping and color factor in the aesthetics. I customized the colors using `scale_color_manual()`. I set a black and white theme. And with the `theme()` function, I set the position of the legend (getting the position right requires a lot of trial and error). Change it and you will understand. I also customized font sizes. 
 
-```{r}
+```{r, message=FALSE}
 ggplot(data, aes(x=LivestockAbundance, y=SR, group=LandUse, color=LandUse)) + geom_point() + stat_smooth(aes(x=LivestockAbundance, y=SR), method = "gam", formula = y ~ s(x)) +
   scale_color_manual(name = "Land use", values = c("#FF7F00", "#8B0000", "#66CD00","#006400")) +
   labs(x = "Livestock abundance", y = "") +
@@ -307,9 +308,9 @@ This first plot, what is Fig. 2 in the manuscript, shows the changes in monthly 
 
 This plot uses `geom_point()` and `facet_wrap()` as before. To plot the credible intervals around the density estimates, I use the `geom_errorbar()` function to which you need to specify the `ymin` and `ymax` values. Also note the use of `scale_x_date()` to set the x label as dates. 
 
-```{r}
+```{r, message=FALSE}
 ggplot(datalist[[1]], aes(x=as.Date(Date), y=MedianAb)) + 
-  facet_wrap(~Species, scales="free_y", nrow = 4, ncol = 3) + labs(y="Estimated ind/km2", x = "Time") + geom_point(size=2) + geom_errorbar(aes(ymin = CI_low, ymax = CI_high), width = 0.5) + theme(axis.text=element_text(size=8),  axis.title=element_text(size=12), axis.line=element_line(size=0.5), axis.ticks=element_line(size=0.5),  strip.text=element_text(size=11), strip.background=element_blank(), panel.border=element_blank(), panel.grid=element_blank(), legend.position = c(0.85, 0.1), legend.title = element_blank()) + scale_x_date(date_breaks = "6 months", date_labels = "%Y %b") 
+  facet_wrap(~Species, scales="free_y", nrow = 4, ncol = 3) + labs(y="Estimated ind/km2", x = "Time") + geom_point(size=2) + geom_errorbar(aes(ymin = CI_low, ymax = CI_high), width = 0.5) + theme(axis.text=element_text(size=8),  axis.title=element_text(size=12), axis.line=element_line(linewidth=0.5), axis.ticks=element_line(size=0.5),  strip.text=element_text(size=11), strip.background=element_blank(), panel.border=element_blank(), panel.grid=element_blank(), legend.position = c(0.85, 0.1), legend.title = element_blank()) + scale_x_date(date_breaks = "6 months", date_labels = "%Y %b") 
 
 ```
 
@@ -384,7 +385,7 @@ ggplot(datalist2[[1]], aes(x = x, y = y, group = factor(time))) + facet_wrap(~Sp
   scale_color_manual(values = rep('darkgray', 34))
 ```
 
-Note, that for the community plot to be added to the facets, the data frame needs to have a column call `Species` with the name `Community`. The Species column in each dataset needs to be specified as a factor with all the levels corresponding to all species plus community as shown here: 
+Note, that for the community plot to be added to the facets, the data frame needs to have a column called `Species` with the name `Community`. The Species column in each dataset needs to be specified as a factor with all the levels corresponding to all species plus community as shown here: 
 
 ```{r, eval = F}
 factor(data$Species, levels= c("Hartebeest", 'Eland','Giraffe',"Grant's gazelle",'Impala',"Thomson's gazelle",'Topi','Warthog','Wildebeest',"Plains zebra", "Community"))
@@ -397,18 +398,22 @@ Phylopic is a free database of silhouetted images of organisms. You can access t
 First, let's load the package (and install it if you do not have done it yet).
 
 ```{r}
+#install.packages("rphylopic")
 library(rphylopic)
 ```
 
 The first thing we need to do to use a Phylopic image, is to search for the desired organism and retrieve its unique identifier (UUID). The rphylopic package provides functions to search and download these images.
 
-Here’s how you can search for and download a Phylopic image of a giraffe. First we search for the images available with the `pick_phylopic()` function. Some species have multiple options to chose from. Here I am asking R to display no more than 4 images.
+Here’s how you can search for and download a Phylopic image of a giraffe. First we search for the images available with the `pick_phylopic()` function. Some species have multiple options to chose from. Here I am asking R to display no more than 4 images. This is an interactive function and you will need to enter which image to display. This is very useful to chose which silhouette you want to use.
 
-```{r}
-giraffe <- search_phylopic(name = "Giraffa camelopardalis", n = 4, view = 4)
+```{r, eval=FALSE}
+pick_phylopic(name = "Giraffa camelopardalis", n = 4, view = 1)
 ```
+You will see something like this: 
 
-One you know which image you want to use, you retrieve the unique identifier using `get_uuid()`.
+![](FIGURES/GiraffePhylopic.jpeg)
+
+Once you know which image you want to use, you retrieve the unique identifier using `get_uuid()`. Here, we are choosing the first image.
 
 ```{r}
 giraffe <- get_uuid(name = "Giraffa camelopardalis", n = 1)
@@ -422,8 +427,44 @@ phylopicsuuid <- data.frame(Species = "Giraffe",
                             uuid = c(giraffe))
 ```
 
+Let's now add the giraffe silhouette to the figure we created before. First, we need to filter the data to keep just the giraffe.
 
+```{r}
+forgirplot <- filter(datalist2[[2]], Species == 'Giraffe')
+```
 
+We can recreate the previous plot but using the giraffe only data.
+
+```{r}
+ggplot(forgirplot, aes(x = x, y = y)) + geom_line(linewidth=1, colour = 'blue') + geom_ribbon(aes(ymin = yLower, ymax = yUpper, group = Species), fill = "blue", alpha = 0.5) +
+  labs(y=expression("Nr. of groups"), x = "NDVI") +
+  theme(axis.text=element_text(size=11), 
+        axis.title=element_text(size=12), 
+        axis.line=element_line(linewidth=0.5),
+        axis.ticks=element_line(linewidth=0.5), 
+        strip.text=element_text(size=11), 
+        strip.background=element_blank(), 
+        panel.border=element_blank(), 
+        panel.grid=element_blank(), legend.position = 'none')
+```
+
+Now, we will use the function `geom_phylopic()` to add the giraffe silhouette to our plot. We need to specify the dataframe with the uuid as the data for `geom_phylopic()`. The tricky part, and it is quite trial and error, is defining the coordinates where the plot will appear (x and y). These will depend on the data you are plotting. Getting the size correct is also trial and error. Color, fill and alpha work as in other ggplot functions.
+
+```{r}
+ggplot(forgirplot, aes(x = x, y = y)) + geom_line(linewidth=1, colour = 'blue') + geom_ribbon(aes(ymin = yLower, ymax = yUpper, group = Species), fill = "blue", alpha = 0.5) +
+  geom_phylopic(data = phylopicsuuid, aes(x = 0.5, y = 1.1, uuid = uuid), size = 1.9, color = 'black', fill = 'black', alpha = 0.3) +
+  labs(y=expression("Nr. of groups"), x = "NDVI") +
+  theme(axis.text=element_text(size=11), 
+        axis.title=element_text(size=12), 
+        axis.line=element_line(linewidth=0.5),
+        axis.ticks=element_line(linewidth=0.5), 
+        strip.text=element_text(size=11), 
+        strip.background=element_blank(), 
+        panel.border=element_blank(), 
+        panel.grid=element_blank(), legend.position = 'none')
+```
+
+Very cool!!
 
 Stay tunned for more examples.
 

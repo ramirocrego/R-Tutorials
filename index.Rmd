@@ -1,0 +1,13 @@
+---
+title: "index"
+author: "Ramiro D Crego"
+date: "`r Sys.Date()`"
+always_allow_html: true
+output: html_document
+---
+
+```{r child = '03-IntroductionToGIS.Rmd'}
+```
+
+# ```{r child = '04-Addax_DistributionModel.Rmd'}
+# ```
