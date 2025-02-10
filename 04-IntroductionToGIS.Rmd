@@ -42,9 +42,9 @@ plot(st_linestring(matrix(runif(6), ncol=2)) )
 plot(st_polygon(list(rbind(c(0,0), c(1,0), c(1,1), c(0,1), c(0,0)))))
 ```
 
-### A short, but important word about coordinates and projections
+### Something very important about coordinates and projections
 
-Any spatial data collected using GPS devices or downloaded online must have a projection system that links the coordinates to specific locations on the earth's surface. Wiithout a coordinate reference system, we cannot locate places on Earth. 
+Any spatial data collected using GPS devices or downloaded online must have a projection system that links the coordinates to specific locations on the earth's surface. Without a coordinate reference system, we cannot locate places on Earth. 
 
 Any given geospatial data (e.g. a set of points) with an incorrect projection or with unknown projection system can be visualized on its own. However, you will not be able to plot that spatial data with other spatial data, as the coordinate reference system is missing. Importantly, you will not be able to conduct any spatial analysis (e.g., calculate the distance of a given point to a road, or extract value of the underlining raster value at the point locations), since the incorrectly projected (or unprojected) spatial data is pointing to a completely different location on earth than intended. 
 
@@ -436,48 +436,61 @@ tm_shape(urban_agglomerations) +
     tm_dots(size = "population_millions")
 ```
 
-In addition, you can change the aesthetics of the maps using either variable fields (data in your shapefile) or constant values. The most commonly used aesthetics for fill and border layers include color, transparency, line width and line type, set with col, alpha, lwd, and lty arguments, respectively. 
+In addition, you can change the aesthetics of the maps using either variable fields (data in your shapefile) or constant values. The most commonly used aesthetics for fill and border layers include color, transparency, line width and line type. In the new version of tmap, we set color for the area of polygons using the `fill` argument and the color of borders using the `col` argument. To add transparency, we use `fill_alpha` and `col_alpha`.
 
 Here some examples on using constant numbers and colors. Note the use of `tmap_arrange` to plot multiple maps.
 
 ```{r}
-ma1 = tm_shape(world) + tm_fill(col = "red")
-ma2 = tm_shape(world) + tm_fill(col = "red", alpha = 0.3)
+ma1 = tm_shape(world) + tm_fill(fill = "red")
+ma2 = tm_shape(world) + tm_fill(fill = "red", fill_alpha = 0.3)
 ma3 = tm_shape(world) + tm_borders(col = "blue")
 ma4 = tm_shape(world) + tm_borders(lwd = 3)
 ma5 = tm_shape(world) + tm_borders(lty = 2)
-ma6 = tm_shape(world) + tm_fill(col = "red", alpha = 0.3) +
-  tm_borders(col = "blue", lwd = 3, lty = 2)
+ma6 = tm_shape(world) + tm_fill(fill = "red", fill_alpha = 0.3) +
+  tm_borders(col = "blue", col_alpha = 0.6, lwd = 3, lty = 2)
 tmap_arrange(ma1, ma2, ma3, ma4, ma5, ma6)
 ```
 
-But we can also color the maps based on some variable of interest. You can use the default breaks for continuous variables or define your own. 'n' sets the number of bins into which numeric variables are categorized and 'palette' defines the color scheme, which in the following example is 'BuGn'. 
+But we can also color the maps based on some variable of interest. You can use the default breaks for continuous variables or define your own. We use the `fill.scale` argument to set the color palette and the number of bins into which numeric variables are categorized. Here, we will use the `brewer.bu_gn` palette that gives different tones of blue. 
+
+You can use palettes from the R package cols4all. Run `cols4all::c4a_gui()` to explore them.
 
 Lets plot population size by country:
 
 ```{r}
-tm_shape(world) + tm_polygons(col = "pop") #default breaks
+tm_shape(world) + tm_polygons(fill = "pop") #default breaks
 breaks = c(0, 2, 5, 10, 100, 500, 2000) * 1000000 # customized breaks
-tm_shape(world) + tm_polygons(col = "pop", breaks = breaks)
-tm_shape(world) + tm_polygons(col = "pop", n = 5)
-tm_shape(world) + tm_polygons(col = "pop", palette = "BuGn", breaks = breaks)
+tm_shape(world) + tm_polygons(fill = "pop", fill.scale = tm_scale(values = "brewer.bu_gn", breaks = breaks))
+```
+
+Finally, we need to make a good legend. This is controled by the argument `fill.legend` for the fill in which you can control the name, position, orientation, etc. Note that if you want to specify legends for other commands, you will need to use the proper argument (e.g., `lwd.legend`). Check the help to learn more.
+
+```{r}
+tm_shape(world) + 
+  tm_polygons(fill = "pop", fill.scale = tm_scale(values = "brewer.bu_gn", breaks = breaks), fill.legend = tm_legend(
+    	title = "Population", orientation = "landscape",
+    	position = tm_pos_out("center", "bottom"), frame = FALSE
+    	))
 ```
 
 So far we have been editing the objects, but a good map needs other elements in the layout. These include title, scale bar, north arrow, any text, etc. 
 
-Additional elements such as north arrows and scale bars have their own functions: `tm_compass()` and `tm_scale_bar()`. Here is an example on how to add the north arrow.
+Additional elements such as north arrows and scale bars have their own functions: `tm_compass()` and `tm_scalebar()`. Here is an example on how to add the north arrow.
 
 ```{r}
 tm_shape(world) + 
-  tm_polygons(col = "pop", palette = "BuGn", breaks = breaks, title = "Population") +
-  tm_compass(position = c("left", "top"))
+  tm_polygons(fill = "pop", fill.scale = tm_scale(values = "brewer.bu_gn", breaks = breaks), fill.legend = tm_legend(
+    	title = "Population", orientation = "landscape",
+    	position = tm_pos_out("center", "bottom"), frame = FALSE
+    	)) +
+  tm_compass(position = c("left", "bottom"))
 ```
 
 ### Animated maps
 
 While static maps sometimes is all you need for a publication or a poster, animated maps can be fantastic ways of showing change across time in presentations or websites where you can display gifs or movies.
 
-There are a few things we need to learn first. In tmaps, the functions `tm_facets` generates faceted maps. There are some arguments that will allow you to display change in several small maps in one figure or animated change by changing the argument in tm_facets(). If you set **by** we get several static maps side by side, if we set **along** we get all maps displayed on top of each other, ready for producing an animation.
+There are a few things we need to learn first. In tmaps, the functions `tm_facets` generates faceted maps. There are some arguments that will allow you to display change in several small maps in one figure or animated change by changing the argument in tm_facets(). If you set **by** we get several static maps side by side, if we set **pages** we get all maps displayed on top of each other, ready for producing an animation.
 
 For instance, a faceted map can look like this:
 
@@ -485,7 +498,7 @@ For instance, a faceted map can look like this:
 tm_shape(world) +
   tm_polygons() +
   tm_shape(urban_agglomerations) +
-  tm_symbols(col = "black", border.col = "white", size = "population_millions") +
+  tm_symbols(fill = "black", col = "white", size = "population_millions") +
   tm_facets(by = "year", nrow = 4, free.coords = FALSE)
 ```
 As you may notice, it can be difficult to visualize the difference between so many maps when they're displayed side by side. But if we set `along = year` it uses all years available to create an animation. We also want to set `free.coords = FALSE`, which maintains the map extent for each map iteration. We then save the map as an object.
@@ -493,7 +506,7 @@ As you may notice, it can be difficult to visualize the difference between so ma
 ```{r}
 pop_anim <- tm_shape(world) + tm_polygons() + 
   tm_shape(urban_agglomerations) + tm_dots(size = "population_millions") +
-  tm_facets(along = "year", free.coords = FALSE)
+  tm_facets(pages = "year", free.coords = FALSE)
 tmap_animation(pop_anim, filename = "urb_anim.gif", delay = 25)
 ```
 Note that the .gif file will be saved to your directory. It will look like this:
@@ -514,7 +527,8 @@ Lets display one of our previous maps on the interactive mode:
 
 ```{r}
 tmap_mode("view")
-tm_shape(world) + tm_polygons(col = "pop", palette = "BuGn", breaks = breaks, title = "Population size in millions")
+tm_shape(world) + tm_polygons(fill = "pop", fill.scale = tm_scale(values = "brewer.bu_gn", breaks = breaks), fill.legend = tm_legend(
+    	title = "Population"))
 ```
 
 You can navigate the map and click on each country to query the population size. You can also change the base map displayed. This type of map is displayed in html, and be saved as an html file to share or even to insert in your own website.
@@ -527,16 +541,15 @@ We will use the previous bird data to create a high quality map.
 tmap_mode("plot")
 
 tm_shape(habitat) +
-  tm_polygons(col="HABITAT", palette = "Greens", title ="Habitat type") +
+  tm_polygons(fill = "HABITAT", fill.scale = tm_scale(values = "brewer.greens"), fill.legend = tm_legend(title ="Habitat type")) +
 tm_shape(roads) +
-  tm_lines(col = "ROAD_USE", palette = "Set1", title.col = "Road use") +
+  tm_lines(col = "ROAD_USE", col.scale = tm_scale(values = "brewer.set1"), col.legend = tm_legend(title = "Road use")) +
 tm_shape(fences) +
-  tm_lines(lty = 'solid', col = "black") + tm_add_legend("line", col = 'black', title = "Fences") +
+  tm_lines(lty = 'solid', col = "black") +
 tm_shape(birds) +
-  tm_dots(col = 'red', size = 0.3) + tm_add_legend("symbol", shape = 16, size=0.4 ,col = 'red', title = "Bird occurrence") +
+  tm_dots(fill = 'red', size = 0.5) +
 tm_compass(position = c("right", "top")) +
-tm_scale_bar(position = c("right", "bottom")) +
-tm_layout(legend.outside = T)
+tm_scalebar(position = c("right", "bottom"), width = 21, breaks = c(0,0.5,1, 1.5,2)) + tm_layout(frame = FALSE, legend.outside = T, legend.frame = F, legend.title.size = 1, legend.text.size = 0.7) + tm_add_legend(type = c("symbols"), fill = c('red'), labels = c("Bird locations")) + tm_add_legend(type = c("lines"), fill = c('red'), labels = c("Fences"))
 ```
 
 We can also create an interactive map. Note that some elements have changed. We removed the scale and north arrow, and the legends are simplified. There are not options for shapes in tmap view mode available at the moment.
@@ -545,13 +558,13 @@ We can also create an interactive map. Note that some elements have changed. We 
 tmap_mode("view")
 
 tm_shape(habitat) +
-  tm_polygons(col="HABITAT", palette = "Greens", title ="Habitat type") +
+tm_polygons(fill = "HABITAT", fill.scale = tm_scale(values = "brewer.greens"), fill.legend = tm_legend(title ="Habitat type")) +
 tm_shape(roads) +
-  tm_lines(col = "ROAD_USE", palette = "Set1", title.col = "Road use") +
+  tm_lines(col = "ROAD_USE", col.scale = tm_scale(values = "brewer.set1"), col.legend = tm_legend(title = "Road use")) +
 tm_shape(fences) +
   tm_lines(lty = 'solid', col = "black") +
 tm_shape(birds) +
-  tm_markers() + tm_add_legend("fill", col = c('black','blue'), labels = c("Fences","Bird locations")) 
+  tm_markers() + tm_add_legend(type = c("symbols"), fill = c('blue'), labels = c("Bird locations")) + tm_add_legend(type = c("lines"), fill = c('black'), labels = c("Fences"))
 ```
 
 ### Another example from my own work
@@ -563,7 +576,7 @@ In this [manuscript](https://drive.google.com/open?id=1JNMYB8qkE64rUN-f8ilDPHtAH
 But for presentations, I wanted to show the map in a dynamic way, as a Dynamic map. So this is the code:
 
 Load data:
-```{r}
+```{r, message=F}
 library(heatmaply)
 
 SR <- st_read("./data/EstiSpRichness.shp")
@@ -576,13 +589,12 @@ prop
 Make a static map for one year
 ```{r}
 tmap_mode(mode="plot")
-tm_shape(prop) + tm_polygons("LU", palette = "Greys", border.col = "white", title="Land use") +
-  tm_legend(legend.show=T) +
-  tm_layout(legend.outside = T, scale = 1.3, title = 2016, title.size = 2, frame = F, legend.position = c("left","center")) +
-  tm_scale_bar(position = c("left","bottom"), size = 0.5) +
-  tm_compass (position = c("left","top")) +
-  tm_shape(SR) + tm_bubbles(size = "2016", col= "2016", border.col="white", palette = RdYlGn (6), scale = 1.1, size.max = 13, title.size = "Sp richness", style = "fixed", breaks = c(0,0.990001,3.90001,5.90001,7.90001,9.90001,13), title.col = "Sp richness", legend.col.show = FALSE, legend.size.show = FALSE) +
-  tm_add_legend("symbol", title = "Sp. richness",  col = RdYlGn (6), size = c(0.4,0.5,0.6,0.7,0.8,0.9), labels = c("0", "1-4","4-6","6-8","8-10","10-13"), border.col="white")
+tm_shape(prop) + tm_polygons(fill = "LU", col = "white", fill.scale = tm_scale(values = "brewer.greys"), fill.legend = tm_legend(title ="Land use")) +
+tm_scalebar(position = c("left", "bottom"), width = 200, breaks = c(0,10,20,30,40)) +
+tm_compass (position = c("left","top")) +
+tm_shape(SR) + tm_bubbles(col="white", size = "2016", size.scale = tm_scale_intervals(breaks = c(0,0.990001,3.90001,5.90001,7.90001,9.90001,13), values.range = c(0,0.8)), size.legend = tm_legend(show = F), fill = "2016", fill.scale = tm_scale(values = RdYlGn(6), breaks = c(0,0.990001,3.90001,5.90001,7.90001,9.90001,13)), fill.legend = tm_legend(title = "Sp richness", show = F)) +
+  tm_add_legend(type = "symbols", title = "Sp. richness",  fill = RdYlGn(6), size = c(0.4,0.5,0.6,0.7,0.8,0.9), labels = c("0", "1-4","4-6","6-8","8-10","10-13"), col="white") +
+    tm_layout(frame = F, legend.outside = T, legend.frame = F, legend.title.size = 1, legend.text.size = 0.7) + tm_title(2016)
 ```
 
 Re-arrange the dataframe to be able to the function `tm_facets`:
@@ -602,14 +614,13 @@ for (i in 2:8){
 
 Create the dynamic map:
 ```{r}
-map <- tm_shape(prop) + tm_polygons("LU", palette = "Greys", border.col = "white", title="Land use") +
-  tm_legend(legend.show=T) +
-  tm_layout(legend.outside = T, scale = 1.3, frame = F, legend.position = c("left","center")) +
-  tm_scale_bar(position = c("left","bottom"), text.size = 0.5) +
+map <- tm_shape(prop) + tm_polygons(fill = "LU", col = "white", fill.scale = tm_scale(values = "brewer.greys"), fill.legend = tm_legend(title ="Land use")) +
+  tm_scalebar(position = c("left", "bottom"), width = 200, breaks = c(0,10,20,30,40)) +
   tm_compass (position = c("left","top")) +
-  tm_shape(SR2) + tm_bubbles(size = "SR", col= "SR", border.col="white", palette = RdYlGn (6), scale = 1.1, size.max = 13, title.size = "Sp richness", style = "fixed", breaks = c(0,0.990001,3.90001,5.90001,7.90001,9.90001,13), title.col = "Sp richness", legend.col.show = FALSE, legend.size.show = FALSE) +
-  tm_add_legend("symbol", title = "Sp. richness", col = RdYlGn (6), size = c(0.4,0.5,0.6,0.7,0.8,0.9), labels = c("0", "1-4","4-6","6-8","8-10","10-13"), border.col="white") +
-  tm_facets(along = "Year", free.coords = FALSE)
+  tm_shape(SR2) + tm_bubbles(col="white", size = "SR", size.scale = tm_scale_intervals(breaks = c(0,0.990001,3.90001,5.90001,7.90001,9.90001,13), values.range = c(0,0.8)), size.legend = tm_legend(show = F), fill = "SR", fill.scale = tm_scale(values = RdYlGn(6), breaks = c(0,0.990001,3.90001,5.90001,7.90001,9.90001,13)), fill.legend = tm_legend(title = "Sp richness", show = F)) +
+  tm_add_legend(type = "symbols", title = "Sp. richness",  fill = RdYlGn(6), size = c(0.4,0.5,0.6,0.7,0.8,0.9), labels = c("0", "1-4","4-6","6-8","8-10","10-13"), col="white") +
+  tm_layout(frame = F, legend.outside = T, legend.frame = F,legend.title.size = 1, legend.text.size = 0.7)  +
+  tm_facets_grid(pages = "Year", free.coords = FALSE)
 
 
 tmap_animation(map, filename = "map_anim.gif", delay = 50)
